@@ -1,0 +1,14 @@
+Auto Login - CakePHP Component
+******************************
+
+Requirements
+============
+
+	* CakePHP 1.2
+	* PHP 5.2.x
+	* Auth Component
+
+Documentation
+=============
+
+	* http://www.milesj.me/resources/script/auto-login-component
