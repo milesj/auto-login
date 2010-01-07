@@ -8,6 +8,17 @@ Requirements
 	* PHP 5.2.x
 	* Auth Component
 
+Features
+========
+
+    * Requires no installation except for adding the checkbox into your user login forms
+    * Automatically saves the cookie and info when a user logs in
+    * Automatically kills the cookie and session when a user logs out
+    * Inserts a hash within the cookie so that it cannot be hijacked
+    * Encrypts the cookie so the information cannot be harvested
+    * Configuration options for cookie name and length
+    * Functionality for additional user updating or error logging
+
 Documentation
 =============
 
