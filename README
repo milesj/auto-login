@@ -1,12 +1,12 @@
-Auto Login - CakePHP Component
-******************************
+Auto Login v1.6 - CakePHP Component
+***********************************
 
 Requirements
 ============
 
 	* CakePHP 1.2
 	* PHP 5.2.x
-	* Auth Component
+	* Auth, Cookie Component
 
 Features
 ========
