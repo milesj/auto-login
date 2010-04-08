@@ -18,7 +18,7 @@ class AutoLoginComponent extends Object {
 	 * @access public
 	 * @var string
 	 */
-	public $version = '1.6';
+	public $version = '1.7';
 	
 	/**
 	 * Cookie name.
@@ -42,12 +42,7 @@ class AutoLoginComponent extends Object {
 	 * @access public
 	 * @var array
 	 */
-	public $settings = array(
-		'plugin' => '',
-		'controller' => '',
-		'loginAction' => '',
-		'logoutAction' => ''
-	);
+	public $settings = array();
 	
 	/**
 	 * Attemps tp grab the controllers cookie class.
@@ -109,11 +104,18 @@ class AutoLoginComponent extends Object {
 	 * @param object $Controller 
 	 * @return void
 	 */
-	public function beforeRedirect(&$Controller) { 
-		$plugin 	= $this->settings['plugin'];
+	public function beforeRedirect(&$Controller) {
+		$this->settings = $this->settings + array(
+			'plugin' => '',
+			'controller' => '',
+			'loginAction' => 'login',
+			'logoutAction' => 'logout'
+		);
+		
+		$plugin = $this->settings['plugin'];
 		$controller = $this->settings['controller'];
-		$loginAction 	= $this->settings['loginAction'];
-		$logoutAction 	= $this->settings['logoutAction'];
+		$loginAction = $this->settings['loginAction'];
+		$logoutAction = $this->settings['logoutAction'];
 		
 		if (is_array($Controller->Auth->loginAction)) {
 			if (!empty($Controller->Auth->loginAction['controller'])) {
@@ -129,14 +131,6 @@ class AutoLoginComponent extends Object {
 			$controller = Inflector::pluralize($Controller->Auth->userModel);
 		}
 		
-		if (empty($loginAction)) {
-			$loginAction = 'login';
-		}
-		
-		if (empty($logoutAction)) {
-			$logoutAction = 'logout';
-		}
-		
 		// Is called after user login/logout validates, but befire auth redirects
 		if ($Controller->plugin == $plugin && $Controller->name == $controller) {
 			$data = $Controller->data;
@@ -145,7 +139,7 @@ class AutoLoginComponent extends Object {
 				case $loginAction:
 					$username = $data[$Controller->Auth->userModel][$Controller->Auth->fields['username']];
 					$password = $data[$Controller->Auth->userModel][$Controller->Auth->fields['password']];
-					$autoLogin = (isset($data[$Controller->Auth->userModel]['auto_login'])) ? $data[$Controller->Auth->userModel]['auto_login'] : 0;
+					$autoLogin = isset($data[$Controller->Auth->userModel]['auto_login']) ? $data[$Controller->Auth->userModel]['auto_login'] : 0;
 					
 					if (!empty($username) && !empty($password) && $autoLogin == 1) {
 						$this->save($username, $password, $Controller);
@@ -188,7 +182,7 @@ class AutoLoginComponent extends Object {
 	 * @return void
 	 */
 	public function delete() {
-		$this->Cookie->del($this->cookieName);
+		$this->Cookie->delete($this->cookieName);
 	}
 	
 }
