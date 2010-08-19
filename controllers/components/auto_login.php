@@ -52,16 +52,17 @@ class AutoLoginComponent extends Object {
      * @return boolean
      */
     public function startup(&$Controller) {
-        $this->Auth = $Controller->Auth;
+        $this->Controller = $Controller;
+        $this->Auth = $this->Controller->Auth;
 
-        if (isset($Controller->Cookie)) {
-            $this->Cookie = $Controller->Cookie;
+        if (isset($this->Controller->Cookie)) {
+            $this->Cookie = $this->Controller->Cookie;
         }
 
         if (!isset($this->Cookie)) {
             App::import('Component', 'Cookie');
             $this->Cookie = new CookieComponent();
-            $this->Cookie->key = Configure::read('Security.salt');
+            $this->Cookie->initialize($Controller, array());
         }
 
         // Read cookie
@@ -120,10 +121,10 @@ class AutoLoginComponent extends Object {
         }
 
         // Is called after user login/logout validates, but befire auth redirects
-        if ($Controller->plugin == $this->settings['plugin'] && $Controller->name == $this->settings['controller']) {
-            $data = $Controller->data;
+        if ($this->Controller->plugin == $this->settings['plugin'] && $this->Controller->name == $this->settings['controller']) {
+            $data = $this->Controller->data;
 
-            switch ($Controller->action) {
+            switch ($this->Controller->action) {
                 case $this->settings['loginAction']:
                     if (isset($data[$this->Auth->userModel])) {
                         $formData = $data[$this->Auth->userModel];
@@ -132,7 +133,7 @@ class AutoLoginComponent extends Object {
                         $autoLogin = isset($formData['auto_login']) ? $formData['auto_login'] : 0;
 
                         if (!empty($username) && !empty($password) && $autoLogin == 1) {
-                            $this->save($username, $password, $Controller);
+                            $this->save($username, $password);
                             
                         } else if ($autoLogin == 0) {
                             $this->delete();
@@ -153,10 +154,9 @@ class AutoLoginComponent extends Object {
      * @access public
      * @param string $username
      * @param string $password
-     * @param object $Controller
      * @return void
      */
-    public function save($username, $password, $Controller) {
+    public function save($username, $password) {
         $time = time();
         $cookie = array();
         $cookie[$this->Auth->fields['username']] = $username;
