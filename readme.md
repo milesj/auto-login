@@ -20,4 +20,29 @@ A CakePHP Component that will automatically login the Auth session for a duratio
 
 ## Documentation ##
 
-Thorough documentation can be found here: http://milesj.me/resources/script/auto-login-component
+Begin by placing the component in your controllers/components/ directory and then adding it to your AppController.
+
+	public $components = array('AutoLogin', 'Cookie', 'Auth');
+
+Add a checkbox to your login form to indicate the "remember me" functionality.
+
+	echo $this->Form->input('auto_login', array('type' => 'checkbox', 'label' => 'Remember Me?'));
+
+Customize the settings of the component to match your application.
+
+	public function beforeFilter() {
+		$this->AutoLogin->cookieName = 'rememberMe';
+		$this->AutoLogin->expires = '+1 month';
+		$this->AutoLogin->settings = array(
+			'controller' => 'Members',
+			'loginAction' => 'signin',
+			'logoutAction' => 'signout'
+		);
+	}
+
+Lastly, the component allows you to define a method to be triggered after every successful login. This method could be used to initialize the users session, update the users last login in time, etc, etc. All you need to do is add a method called _autoLogin() to your AppController.
+
+	public function _autoLogin($user) {
+		// Do something
+		// $user contains the Auth session
+	}
