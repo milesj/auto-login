@@ -18,7 +18,7 @@ class AutoLoginComponent extends Object {
      * @access public
      * @var string
      */
-    public $version = '1.8';
+    public $version = '1.9';
 
     /**
      * Cookie name.
@@ -51,7 +51,7 @@ class AutoLoginComponent extends Object {
      * @param object $Controller
      * @return boolean
      */
-    public function startup(&$Controller) {
+    public function startup($Controller) {
         $this->Controller = $Controller;
         $this->Auth = $this->Controller->Auth;
 
@@ -61,8 +61,9 @@ class AutoLoginComponent extends Object {
 
         if (!isset($this->Cookie)) {
             App::import('Component', 'Cookie');
+			
             $this->Cookie = new CookieComponent();
-            $this->Cookie->initialize($Controller, array());
+            $this->Cookie->initialize($this->Controller, array());
         }
 
         // Read cookie
@@ -78,11 +79,11 @@ class AutoLoginComponent extends Object {
         }
 
         if ($this->Auth->login($cookie)) {
-            if (in_array('_autoLogin', get_class_methods($Controller))) {
+            if (in_array('_autoLogin', get_class_methods($this->Controller))) {
                 call_user_func_array(array(&$Controller, '_autoLogin'), array($this->Auth->user()));
             }
         } else {
-            if (in_array('_autoLoginError', get_class_methods($Controller))) {
+            if (in_array('_autoLoginError', get_class_methods($this->Controller))) {
                 call_user_func_array(array(&$Controller, '_autoLoginError'), array($cookie));
             }
         }
@@ -98,7 +99,7 @@ class AutoLoginComponent extends Object {
      * @param object $Controller
      * @return void
      */
-    public function beforeRedirect(&$Controller) {
+    public function beforeRedirect($Controller) {
         $this->settings = $this->settings + array(
             'plugin' => '',
             'controller' => '',
