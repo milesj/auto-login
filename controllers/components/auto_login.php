@@ -53,15 +53,20 @@ class AutoLoginComponent extends Object {
 	public $debug = false;
 
 	/**
-     * Detect debug info.
-     *
-     * @access public
-     * @param object $Controller
-     * @return void
-     */
-    public function initialize($Controller) {
+	 * Detect debug info.
+	 *
+	 * @access public
+	 * @param object $Controller
+	 * @return void
+	 */
+	public function initialize($Controller) {
 		$debug = Configure::read('AutoLogin');
-		
+
+		if (!is_array($debug['ips'])) {
+			$debug['ips'] = array($debug['ips']);
+			Configure::read('AutoLogin.ips', $debug['ips']);
+		}
+
 		$this->debug = (isset($debug['email']) && isset($debug['ips']) && in_array(env('REMOTE_ADDR'), $debug['ips']));
 	}
 

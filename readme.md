@@ -1,4 +1,4 @@
-# Auto Login v1.9 #
+# Auto Login v2.0 #
 
 A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
 
@@ -46,3 +46,12 @@ Lastly, the component allows you to define a method to be triggered after every 
 		// Do something
 		// $user contains the Auth session
 	}
+
+## Debugging ##
+
+It can be quite difficult to debug this component if something is not working, simply because this component is automatically ran on each page load and during the login process. You can enable an internal debug system that will email you cookie and user information at specific events so that you may figure out which step the script is dieing on. The debug settings take an email (where the debug will be sent) and an array of IPs (emails will only be sent if you are browsing with these IPs). To use the debug, simply set it in bootstrap.php.
+
+	Configure::write('AutoLogin', array(
+		'email' => 'contact@milesj.me',
+		'ips' => array('127.0.0.1')
+	));
