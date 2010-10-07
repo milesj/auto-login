@@ -110,6 +110,7 @@ class AutoLoginComponent extends Object {
 		}
 
 		if ($this->Auth->login($cookie)) {
+			$user = $this->Auth->user();
 			$this->debug('Login succesful', $cookie, $user);
 
 			if (in_array('_autoLogin', get_class_methods($Controller))) {
