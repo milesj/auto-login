@@ -64,7 +64,7 @@ class AutoLoginComponent extends Object {
 
 		if (!is_array($debug['ips'])) {
 			$debug['ips'] = array($debug['ips']);
-			Configure::read('AutoLogin.ips', $debug['ips']);
+			Configure::write('AutoLogin.ips', $debug['ips']);
 		}
 
 		$this->debug = (isset($debug['email']) && isset($debug['ips']) && in_array(env('REMOTE_ADDR'), $debug['ips']));
@@ -113,13 +113,13 @@ class AutoLoginComponent extends Object {
 			$this->debug('Login succesful', $cookie, $user);
 
 			if (in_array('_autoLogin', get_class_methods($Controller))) {
-				call_user_func_array(array(&$Controller, '_autoLogin'), array($user));
+				call_user_func_array(array($Controller, '_autoLogin'), array($user));
 			}
 		} else {
 			$this->debug('Login failed', $cookie, $user);
 
 			if (in_array('_autoLoginError', get_class_methods($Controller))) {
-				call_user_func_array(array(&$Controller, '_autoLoginError'), array($cookie));
+				call_user_func_array(array($Controller, '_autoLoginError'), array($cookie));
 			}
 		}
 
