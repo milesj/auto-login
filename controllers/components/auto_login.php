@@ -1,5 +1,5 @@
 <?php
-/** 
+/**
  * Auto Login Component
  *
  * A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
@@ -147,8 +147,10 @@ class AutoLoginComponent extends Object {
 			}
 		}
 
-		if (!empty($this->Auth->userModel) && empty($this->settings['controller'])) {
-			$this->settings['controller'] = Inflector::pluralize($this->Auth->userModel);
+		list($plugin, $userModel) = pluginSplit($this->Auth->userModel);
+
+		if (!empty($userModel) && empty($this->settings['controller'])) {
+			$this->settings['controller'] = Inflector::pluralize($userModel);
 		}
 
 		// Is called after user login/logout validates, but befire auth redirects
@@ -157,8 +159,8 @@ class AutoLoginComponent extends Object {
 
 			switch ($Controller->action) {
 				case $this->settings['loginAction']:
-					if (isset($data[$this->Auth->userModel])) {
-						$formData = $data[$this->Auth->userModel];
+					if (isset($data[$userModel])) {
+						$formData = $data[$userModel];
 						$username = $formData[$this->Auth->fields['username']];
 						$password = $formData[$this->Auth->fields['password']];
 						$autoLogin = isset($formData['auto_login']) ? $formData['auto_login'] : 0;
