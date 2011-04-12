@@ -1,14 +1,14 @@
 <?php
 /** 
-* Auto Login Component
-*
-* A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies). 
-*
-* @author       Miles Johnson - http://milesj.me
-* @copyright    Copyright 2006-2010, Miles Johnson, Inc.
-* @license      http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
-* @link         http://milesj.me/resources/script/auto-login-component
-*/
+ * Auto Login Component
+ *
+ * A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
+ *
+ * @author		Miles Johnson - http://milesj.me
+ * @copyright	Copyright 2006-2011, Miles Johnson, Inc.
+ * @license		http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
+ * @link		http://milesj.me/resources/script/auto-login-component
+ */
 
 class AutoLoginComponent extends Object {
 
@@ -18,7 +18,15 @@ class AutoLoginComponent extends Object {
 	 * @access public
 	 * @var string
 	 */
-	public $version = '2.0';
+	public $version = '2.1';
+
+	/**
+	 * Components.
+	 *
+	 * @access public
+	 * @var array
+	 */
+	public $components = array('Auth', 'Cookie');
 
 	/**
 	 * Cookie name.
@@ -78,20 +86,6 @@ class AutoLoginComponent extends Object {
 	 * @return boolean
 	 */
 	public function startup($Controller) {
-		$this->Controller = $Controller;
-		$this->Auth = $this->Controller->Auth;
-
-		if (isset($this->Controller->Cookie)) {
-			$this->Cookie = $this->Controller->Cookie;
-		}
-
-		if (!isset($this->Cookie)) {
-			App::import('Component', 'Cookie');
-
-			$this->Cookie = new CookieComponent();
-			$this->Cookie->initialize($Controller, array());
-		}
-
 		$cookie = $this->Cookie->read($this->cookieName);
 		$user = $this->Auth->user();
 
@@ -158,10 +152,10 @@ class AutoLoginComponent extends Object {
 		}
 
 		// Is called after user login/logout validates, but befire auth redirects
-		if ($this->Controller->plugin == $this->settings['plugin'] && $this->Controller->name == $this->settings['controller']) {
-			$data = $this->Controller->data;
+		if ($Controller->plugin == $this->settings['plugin'] && $Controller->name == $this->settings['controller']) {
+			$data = $Controller->data;
 
-			switch ($this->Controller->action) {
+			switch ($Controller->action) {
 				case $this->settings['loginAction']:
 					if (isset($data[$this->Auth->userModel])) {
 						$formData = $data[$this->Auth->userModel];

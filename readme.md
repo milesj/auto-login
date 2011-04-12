@@ -1,4 +1,4 @@
-# Auto Login v2.0 #
+# Auto Login v2.1 #
 
 A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
 
@@ -22,7 +22,7 @@ A CakePHP Component that will automatically login the Auth session for a duratio
 
 Begin by placing the component in your controllers/components/ directory and then adding it to your AppController.
 
-	public $components = array('AutoLogin', 'Cookie', 'Auth');
+	public $components = array('AutoLogin');
 
 Add a checkbox to your login form to indicate the "remember me" functionality.
 
@@ -43,7 +43,6 @@ Customize the settings of the component to match your application.
 Lastly, the component allows you to define a method to be triggered after every successful login. This method could be used to initialize the users session, update the users last login in time, etc, etc. All you need to do is add a method called _autoLogin() to your AppController.
 
 	public function _autoLogin($user) {
-		// Do something
 		// $user contains the Auth session
 	}
 
@@ -52,6 +51,6 @@ Lastly, the component allows you to define a method to be triggered after every 
 It can be quite difficult to debug this component if something is not working, simply because this component is automatically ran on each page load and during the login process. You can enable an internal debug system that will email you cookie and user information at specific events so that you may figure out which step the script is dieing on. The debug settings take an email (where the debug will be sent) and an array of IPs (emails will only be sent if you are browsing with these IPs). To use the debug, simply set it in bootstrap.php.
 
 	Configure::write('AutoLogin', array(
-		'email' => 'contact@milesj.me',
+		'email' => 'email@domain.com',
 		'ips' => array('127.0.0.1')
 	));
