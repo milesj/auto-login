@@ -18,7 +18,7 @@ class AutoLoginComponent extends Object {
 	 * @access public
 	 * @var string
 	 */
-	public $version = '2.1';
+	public $version = '2.2';
 
 	/**
 	 * Components.
@@ -55,27 +55,28 @@ class AutoLoginComponent extends Object {
 	/**
 	 * Should we debug?
 	 *
-	 * @access public
+	 * @access protected
 	 * @var boolean
 	 */
-	public $debug = false;
+	protected $_debug = false;
 
 	/**
 	 * Detect debug info.
 	 *
 	 * @access public
 	 * @param object $Controller
+	 * @param array $settings
 	 * @return void
 	 */
-	public function initialize($Controller) {
+	public function initialize($Controller, $settings = array()) {
 		$debug = Configure::read('AutoLogin');
 
-		if (!is_array($debug['ips'])) {
+		if (isset($debug['ips']) && !is_array($debug['ips'])) {
 			$debug['ips'] = array($debug['ips']);
-			Configure::write('AutoLogin.ips', $debug['ips']);
 		}
 
-		$this->debug = (isset($debug['email']) && isset($debug['ips']) && in_array(env('REMOTE_ADDR'), $debug['ips']));
+		$this->_debug = (isset($debug['email']) && isset($debug['ips']) && in_array(env('REMOTE_ADDR'), $debug['ips']));
+		$this->_set($settings);
 	}
 
 	/**
@@ -89,29 +90,29 @@ class AutoLoginComponent extends Object {
 		$cookie = $this->Cookie->read($this->cookieName);
 		$user = $this->Auth->user();
 
-		if ($user) {
+		if (!empty($user)) {
 			return;
 
 		} else if (!is_array($cookie)) {
-			$this->debug('Cookie failed', $cookie, $user);
+			$this->debug('cookieFail', $this->Cookie, $user);
 			$this->delete();
 			return;
 
 		} else if ($cookie['hash'] != $this->Auth->password($cookie[$this->Auth->fields['username']] . $cookie['time'])) {
-			$this->debug('Hash failed', $cookie, $user);
+			$this->debug('hashFail', $this->Cookie, $user);
 			$this->delete();
 			return;
 		}
 
 		if ($this->Auth->login($cookie)) {
 			$user = $this->Auth->user();
-			$this->debug('Login succesful', $cookie, $user);
+			$this->debug('login', $this->Cookie, $user);
 
 			if (in_array('_autoLogin', get_class_methods($Controller))) {
 				call_user_func_array(array($Controller, '_autoLogin'), array($user));
 			}
 		} else {
-			$this->debug('Login failed', $cookie, $user);
+			$this->debug('loginFail', $this->Cookie, $user);
 
 			if (in_array('_autoLoginError', get_class_methods($Controller))) {
 				call_user_func_array(array($Controller, '_autoLoginError'), array($cookie));
@@ -175,6 +176,7 @@ class AutoLoginComponent extends Object {
 				break;
 
 				case $this->settings['logoutAction']:
+					$this->debug('logout', $this->Cookie, $this->Auth->user());
 					$this->delete();
 				break;
 			}
@@ -198,7 +200,7 @@ class AutoLoginComponent extends Object {
 		$cookie['time'] = $time;
 
 		$this->Cookie->write($this->cookieName, $cookie, true, $this->expires);
-		$this->debug('Cookie set', $cookie);
+		$this->debug('cookieSet', $cookie, $this->Auth->user());
 	}
 
 	/**
@@ -215,25 +217,43 @@ class AutoLoginComponent extends Object {
 	 * Debug the current auth/cookies.
 	 *
 	 * @access public
-	 * @param string $message
+	 * @param string $key
 	 * @param array $cookie
 	 * @param array $user
 	 * @return void
 	 */
-	public function debug($message, $cookie = array(), $user = array()) {
-		if ($this->debug) {
-			$email = Configure::read('AutoLogin.email');
-			$content = 'No debug information.';
+	public function debug($key, $cookie = array(), $user = array()) {
+		$scopes = array(
+			'login'				=> 'Login Successful',
+			'loginFail'			=> 'Login Failure',
+			'loginCallback'		=> 'Login Callback',
+			'logout'			=> 'Logout',
+			'logoutCallback'	=> 'Logout Callback',
+			'cookieSet'			=> 'Cookie Set',
+			'cookieFail'		=> 'Cookie Mismatch',
+			'hashFail'			=> 'Hash Mismatch',
+			'custom'			=> 'Custom Callback'
+		);
 
-			if (!empty($cookie)) {
-				$content = "Cookie information: \n\n". print_r($cookie, true) ."\n\n\n";
+		if ($this->_debug && isset($scopes[$key])) {
+			$debug = Configure::read('AutoLogin');
+			$content = "";
+
+			if (!empty($cookie) || !empty($user)) {
+				if (!empty($cookie)) {
+					$content .= "Cookie information: \n\n". print_r($cookie, true) ."\n\n\n";
+				}
+
+				if (!empty($user)) {
+					$content .= "User information: \n\n". print_r($user, true);
+				}
+			} else {
+				$content = 'No debug information.';
 			}
 
-			if (!empty($user)) {
-				$content .= "User information: \n\n". print_r($user, true);
+			if (empty($debug['scope']) || in_array($key, $debug['scope'])) {
+				mail($debug['email'], '[AutoLogin] '. $scopes[$key], $content, 'From: '. $debug['email']);
 			}
-
-			mail($email, '[AutoLogin] '. $message, $content, 'From: '. $email);
 		}
 	}
 
