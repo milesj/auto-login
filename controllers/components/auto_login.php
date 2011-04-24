@@ -61,6 +61,22 @@ class AutoLoginComponent extends Object {
 	protected $_debug = false;
 
 	/**
+	 * Has initialize() been ran?
+	 *
+	 * @access protected
+	 * @var boolean
+	 */
+	protected $_hasInitialized = false;
+
+	/**
+	 * Has startup() been ran?
+	 *
+	 * @access protected
+	 * @var boolean
+	 */
+	protected $_hasStartup = false;
+
+	/**
 	 * Detect debug info.
 	 *
 	 * @access public
@@ -69,6 +85,10 @@ class AutoLoginComponent extends Object {
 	 * @return void
 	 */
 	public function initialize($Controller, $settings = array()) {
+		if ($this->_hasInitialized) {
+			return;
+		}
+
 		$debug = Configure::read('AutoLogin');
 
 		if (isset($debug['ips']) && !is_array($debug['ips'])) {
@@ -76,6 +96,8 @@ class AutoLoginComponent extends Object {
 		}
 
 		$this->_debug = (isset($debug['email']) && isset($debug['ips']) && in_array(env('REMOTE_ADDR'), $debug['ips']));
+		$this->_hasInitialized = true;
+		
 		$this->_set($settings);
 	}
 
@@ -87,6 +109,10 @@ class AutoLoginComponent extends Object {
 	 * @return boolean
 	 */
 	public function startup($Controller) {
+		if ($this->_hasStartup) {
+			return;
+		}
+		
 		$cookie = $this->Cookie->read($this->cookieName);
 		$user = $this->Auth->user();
 
@@ -119,7 +145,7 @@ class AutoLoginComponent extends Object {
 			}
 		}
 
-		return;
+		$this->_hasStartup = true;
 	}
 
 	/**
