@@ -7,13 +7,13 @@
  * @author		Miles Johnson - http://milesj.me
  * @copyright	Copyright 2006-2011, Miles Johnson, Inc.
  * @license		http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
- * @link		http://milesj.me/resources/script/auto-login-component
+ * @link		http://milesj.me/code/cakephp/auto-login
  */
 
 class AutoLoginComponent extends Object {
 
 	/**
-	 * Current version: http://milesj.me/resources/logs/auto-login-component
+	 * Current version.
 	 *
 	 * @access public
 	 * @var string
