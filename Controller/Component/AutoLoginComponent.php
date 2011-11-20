@@ -1,6 +1,6 @@
 <?php
 /**
- * Auto Login Component
+ * AutoLoginComponent
  *
  * A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
  *
@@ -10,7 +10,7 @@
  * @link		http://milesj.me/code/cakephp/auto-login
  */
 
-class AutoLoginComponent extends Object {
+class AutoLoginComponent extends Component {
 
 	/**
 	 * Current version.
@@ -18,7 +18,7 @@ class AutoLoginComponent extends Object {
 	 * @access public
 	 * @var string
 	 */
-	public $version = '2.2';
+	public $version = '3.0';
 
 	/**
 	 * Components.
