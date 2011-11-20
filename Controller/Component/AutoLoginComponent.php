@@ -59,60 +59,28 @@ class AutoLoginComponent extends Component {
 	 * @var boolean
 	 */
 	protected $_debug = false;
-
-	/**
-	 * Has initialize() been ran?
-	 *
-	 * @access protected
-	 * @var boolean
-	 */
-	protected $_hasInitialized = false;
-
-	/**
-	 * Has startup() been ran?
-	 *
-	 * @access protected
-	 * @var boolean
-	 */
-	protected $_hasStartup = false;
-
+	
 	/**
 	 * Detect debug info.
 	 *
 	 * @access public
-	 * @param object $Controller
-	 * @param array $settings
+	 * @param Controller $controller
 	 * @return void
 	 */
-	public function initialize($Controller, $settings = array()) {
-		if ($this->_hasInitialized) {
-			return;
-		}
-
+	public function initialize($controller) {
 		$debug = Configure::read('AutoLogin');
 
-		if (isset($debug['ips']) && !is_array($debug['ips'])) {
-			$debug['ips'] = array($debug['ips']);
-		}
-
-		$this->_debug = (isset($debug['email']) && isset($debug['ips']) && in_array(env('REMOTE_ADDR'), $debug['ips']));
-		$this->_hasInitialized = true;
-		
-		$this->_set($settings);
+		$this->_debug = (isset($debug['email']) && isset($debug['ips']) && in_array(env('REMOTE_ADDR'), (array) $debug['ips']));
 	}
 
 	/**
 	 * Automatically login existent Auth session; called after controllers beforeFilter() so that Auth is initialized.
 	 *
 	 * @access public
-	 * @param object $Controller
+	 * @param Controller $controller
 	 * @return boolean
 	 */
-	public function startup($Controller) {
-		if ($this->_hasStartup) {
-			return;
-		}
-		
+	public function startup($controller) {
 		$cookie = $this->Cookie->read($this->cookieName);
 		$user = $this->Auth->user();
 
@@ -134,18 +102,16 @@ class AutoLoginComponent extends Component {
 			$user = $this->Auth->user();
 			$this->debug('login', $this->Cookie, $user);
 
-			if (in_array('_autoLogin', get_class_methods($Controller))) {
-				call_user_func_array(array($Controller, '_autoLogin'), array($user));
+			if (in_array('_autoLogin', get_class_methods($controller))) {
+				call_user_func_array(array($controller, '_autoLogin'), array($user));
 			}
 		} else {
 			$this->debug('loginFail', $this->Cookie, $user);
 
-			if (in_array('_autoLoginError', get_class_methods($Controller))) {
-				call_user_func_array(array($Controller, '_autoLoginError'), array($cookie));
+			if (in_array('_autoLoginError', get_class_methods($controller))) {
+				call_user_func_array(array($controller, '_autoLoginError'), array($cookie));
 			}
 		}
-
-		$this->_hasStartup = true;
 	}
 
 	/**
@@ -153,10 +119,10 @@ class AutoLoginComponent extends Component {
 	 *
 	 * @access public
 	 * @uses Inflector
-	 * @param object $Controller
+	 * @param Controller $controller
 	 * @return void
 	 */
-	public function beforeRedirect($Controller) {
+	public function beforeRedirect($controller) {
 		$this->settings = $this->settings + array(
 			'plugin' => '',
 			'controller' => '',
@@ -181,10 +147,10 @@ class AutoLoginComponent extends Component {
 		}
 
 		// Is called after user login/logout validates, but befire auth redirects
-		if ($Controller->plugin == $this->settings['plugin'] && $Controller->name == $this->settings['controller']) {
-			$data = $Controller->data;
+		if ($controller->plugin == $this->settings['plugin'] && $controller->name == $this->settings['controller']) {
+			$data = $controller->data;
 
-			switch ($Controller->action) {
+			switch ($controller->action) {
 				case $this->settings['loginAction']:
 					if (isset($data[$userModel])) {
 						$formData = $data[$userModel];
