@@ -43,6 +43,17 @@ class AutoLoginComponent extends Component {
 	 * @var string
 	 */
 	public $expires = '+2 weeks';
+	
+	/**
+	 * Custom user fields.
+	 * 
+	 * @access public
+	 * @var array
+	 */
+	public $fields = array(
+		'username' => 'username',
+		'password' => 'password'
+	);
 
 	/**
 	 * Settings.
@@ -92,7 +103,7 @@ class AutoLoginComponent extends Component {
 			$this->delete();
 			return;
 
-		} else if ($cookie['hash'] != $this->Auth->password($cookie[$this->Auth->fields['username']] . $cookie['time'])) {
+		} else if ($cookie['hash'] != $this->Auth->password($cookie[$this->fields['username']] . $cookie['time'])) {
 			$this->debug('hashFail', $this->Cookie, $user);
 			$this->delete();
 			return;
@@ -154,8 +165,8 @@ class AutoLoginComponent extends Component {
 				case $this->settings['loginAction']:
 					if (isset($data[$userModel])) {
 						$formData = $data[$userModel];
-						$username = $formData[$this->Auth->fields['username']];
-						$password = $formData[$this->Auth->fields['password']];
+						$username = $formData[$this->fields['username']];
+						$password = $formData[$this->fields['password']];
 						$autoLogin = isset($formData['auto_login']) ? $formData['auto_login'] : 0;
 
 						if (!empty($username) && !empty($password) && $autoLogin == 1) {
@@ -185,9 +196,10 @@ class AutoLoginComponent extends Component {
 	 */
 	public function save($username, $password) {
 		$time = time();
+		
 		$cookie = array();
-		$cookie[$this->Auth->fields['username']] = $username;
-		$cookie[$this->Auth->fields['password']] = $password; // Already hashed from auth
+		$cookie[$this->fields['username']] = $username;
+		$cookie[$this->fields['password']] = $this->Auth->password($password);
 		$cookie['hash'] = $this->Auth->password($username . $time);
 		$cookie['time'] = $time;
 
