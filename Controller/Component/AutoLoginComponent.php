@@ -37,7 +37,7 @@ class AutoLoginComponent extends Component {
 	public $cookieName = 'autoLogin';
 
 	/**
-	 * Cookie length (strtotime()).
+	 * Cookie length (strtotime() format).
 	 *
 	 * @access public
 	 * @var string
@@ -111,6 +111,7 @@ class AutoLoginComponent extends Component {
 
 		if ($this->Auth->login($cookie)) {
 			$user = $this->Auth->user();
+			
 			$this->debug('login', $this->Cookie, $user);
 
 			if (in_array('_autoLogin', get_class_methods($controller))) {
@@ -143,11 +144,15 @@ class AutoLoginComponent extends Component {
 
 		if (is_array($this->Auth->loginAction)) {
 			if (!empty($this->Auth->loginAction['controller'])) {
-				$this->settings['controller'] = Inflector::camelize($this->Auth->loginAction['controller']);
+				$this->settings['controller'] = $this->Auth->loginAction['controller'];
 			}
 
 			if (!empty($this->Auth->loginAction['action'])) {
 				$this->settings['loginAction'] = $this->Auth->loginAction['action'];
+			}
+
+			if (!empty($this->Auth->loginAction['plugin'])) {
+				$this->settings['plugin'] = $this->Auth->loginAction['plugin'];
 			}
 		}
 
@@ -158,10 +163,10 @@ class AutoLoginComponent extends Component {
 		}
 
 		// Is called after user login/logout validates, but befire auth redirects
-		if ($controller->plugin == $this->settings['plugin'] && $controller->name == $this->settings['controller']) {
-			$data = $controller->data;
+		if ($controller->plugin == $this->settings['plugin'] && $controller->name == Inflector::camelize($this->settings['controller'])) {
+			$data = $controller->request->data;
 
-			switch ($controller->action) {
+			switch ($controller->request->params['action']) {
 				case $this->settings['loginAction']:
 					if (isset($data[$userModel])) {
 						$formData = $data[$userModel];
@@ -169,7 +174,7 @@ class AutoLoginComponent extends Component {
 						$password = $formData[$this->fields['password']];
 						$autoLogin = isset($formData['auto_login']) ? $formData['auto_login'] : 0;
 
-						if (!empty($username) && !empty($password) && $autoLogin == 1) {
+						if (!empty($username) && !empty($password) && $autoLogin) {
 							$this->save($username, $password);
 
 						} else if ($autoLogin == 0) {
@@ -218,7 +223,7 @@ class AutoLoginComponent extends Component {
 	}
 
 	/**
-	 * Debug the current auth/cookies.
+	 * Debug the current auth and cookies.
 	 *
 	 * @access public
 	 * @param string $key
