@@ -18,7 +18,7 @@ class AutoLoginComponent extends Component {
 	 * @access public
 	 * @var string
 	 */
-	public $version = '3.0';
+	public $version = '3.1';
 
 	/**
 	 * Components.
@@ -264,18 +264,18 @@ class AutoLoginComponent extends Component {
 
 			if (!empty($cookie) || !empty($user)) {
 				if (!empty($cookie)) {
-					$content .= "Cookie information: \n\n". print_r($cookie, true) ."\n\n\n";
+					$content .= "Cookie information: \n\n" . print_r($cookie, true) . "\n\n\n";
 				}
 
 				if (!empty($user)) {
-					$content .= "User information: \n\n". print_r($user, true);
+					$content .= "User information: \n\n" . print_r($user, true);
 				}
 			} else {
 				$content = 'No debug information.';
 			}
 
 			if (empty($debug['scope']) || in_array($key, $debug['scope'])) {
-				mail($debug['email'], '[AutoLogin] '. $scopes[$key], $content, 'From: '. $debug['email']);
+				mail($debug['email'], '[AutoLogin] ' . $scopes[$key], $content, 'From: ' . $debug['email']);
 			}
 		}
 	}
