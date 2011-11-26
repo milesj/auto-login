@@ -156,7 +156,17 @@ class AutoLoginComponent extends Component {
 			}
 		}
 
-		list($plugin, $userModel) = pluginSplit($this->Auth->userModel);
+		// Get the correct model
+		$userModel = 'User';
+		
+		if (isset($this->Auth->authenticate['all']['userModel'])) {
+			$userModel = $this->Auth->authenticate['all']['userModel'];
+			
+		} else if (isset($this->Auth->authenticate['Form']['userModel'])) {
+			$userModel = $this->Auth->authenticate['Form']['userModel'];
+		}
+		
+		list($plugin, $userModel) = pluginSplit($userModel);
 
 		if (!empty($userModel) && empty($this->settings['controller'])) {
 			$this->settings['controller'] = Inflector::pluralize($userModel);
@@ -207,6 +217,10 @@ class AutoLoginComponent extends Component {
 		$cookie[$this->fields['password']] = $this->Auth->password($password);
 		$cookie['hash'] = $this->Auth->password($username . $time);
 		$cookie['time'] = $time;
+		
+		if (env('REMOTE_ADDR') == '127.0.0.1' || env('HTTP_HOST') == 'localhost') {
+			$this->Cookie->domain = false;
+		}
 
 		$this->Cookie->write($this->cookieName, $cookie, true, $this->expires);
 		$this->debug('cookieSet', $cookie, $this->Auth->user());
