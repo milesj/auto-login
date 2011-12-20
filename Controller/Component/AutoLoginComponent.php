@@ -137,6 +137,7 @@ class AutoLoginComponent extends Component {
 	 */
 	public function beforeRedirect($controller) {
 		$model = $this->settings['model'];
+		$action = isset($controller->request->params['action']) ? $controller->request->params['action'] : 'login';
 		
 		if (is_array($this->Auth->loginAction)) {
 			if (!empty($this->Auth->loginAction['controller'])) {
@@ -160,7 +161,7 @@ class AutoLoginComponent extends Component {
 		if ($controller->plugin == $this->settings['plugin'] && $controller->name == Inflector::camelize($this->settings['controller'])) {
 			$data = $controller->request->data;
 
-			switch ($controller->request->params['action']) {
+			switch ($action) {
 				case $this->settings['loginAction']:
 					if (isset($data[$model])) {
 						$username = $data[$model][$this->settings['username']];

@@ -22,10 +22,11 @@ This version is only compatible with CakePHP 2.0.
 * Encrypts the cookie so the information cannot be harvested
 * Configuration options for cookie name and length
 * Functionality for additional user updating or error logging
+* Minor support for localhost cookies
 
 ## Troubleshooting ##
 
-If you have Suhosin installed alongside PHP, you will run into problems with cookie encryption. It's best to disable Suhosin, or implement this workaround. If you find a better solution, please notify me!
+If you have Suhosin installed alongside PHP, you will run into problems with cookie encryption. It's best to disable Suhosin or implement this workaround. If you find a better solution, please notify me!
 
 http://milesj.me/blog/read/security-cipher-suhosin
 
