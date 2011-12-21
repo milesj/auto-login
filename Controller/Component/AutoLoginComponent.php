@@ -137,7 +137,6 @@ class AutoLoginComponent extends Component {
 	 */
 	public function beforeRedirect($controller) {
 		$model = $this->settings['model'];
-		$action = isset($controller->request->params['action']) ? $controller->request->params['action'] : 'login';
 		
 		if (is_array($this->Auth->loginAction)) {
 			if (!empty($this->Auth->loginAction['controller'])) {
@@ -157,9 +156,10 @@ class AutoLoginComponent extends Component {
 			$this->settings['controller'] = Inflector::pluralize($model);
 		}
 
-		// Is called after user login/logout validates, but befire auth redirects
+		// Is called after user login/logout validates, but before auth redirects
 		if ($controller->plugin == $this->settings['plugin'] && $controller->name == Inflector::camelize($this->settings['controller'])) {
 			$data = $controller->request->data;
+			$action = isset($controller->request->params['action']) ? $controller->request->params['action'] : 'login';
 
 			switch ($action) {
 				case $this->settings['loginAction']:
