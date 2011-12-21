@@ -18,7 +18,7 @@ class AutoLoginComponent extends Component {
 	 * @access public
 	 * @var string
 	 */
-	public $version = '3.2';
+	public $version = '3.2.1';
 
 	/**
 	 * Components.
@@ -61,6 +61,22 @@ class AutoLoginComponent extends Component {
 	protected $_debug = false;
 	
 	/**
+	 * Default settings.
+	 * 
+	 * @access protected
+	 * @var array
+	 */
+	protected $_defaults = array(
+		'model' => 'User',
+		'username' => 'username',
+		'password' => 'password',
+		'plugin' => '',
+		'controller' => 'users',
+		'loginAction' => 'login',
+		'logoutAction' => 'logout'
+	);
+	
+	/**
 	 * Detect debug info.
 	 *
 	 * @access public
@@ -81,15 +97,7 @@ class AutoLoginComponent extends Component {
 	 * @return boolean
 	 */
 	public function startup($controller) {
-		$this->settings = $this->settings + array(
-			'model' => 'User',
-			'username' => 'username',
-			'password' => 'password',
-			'plugin' => '',
-			'controller' => 'users',
-			'loginAction' => 'login',
-			'logoutAction' => 'logout'
-		);
+		$this->settings = $this->settings + $this->_defaults;
 		
 		$cookie = $this->Cookie->read($this->cookieName);
 		$user = $this->Auth->user();
@@ -136,6 +144,8 @@ class AutoLoginComponent extends Component {
 	 * @return void
 	 */
 	public function beforeRedirect($controller) {
+		$this->settings = $this->settings + $this->_defaults;
+		
 		$model = $this->settings['model'];
 		
 		if (is_array($this->Auth->loginAction)) {
