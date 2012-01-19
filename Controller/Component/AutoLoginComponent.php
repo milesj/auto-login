@@ -20,7 +20,7 @@ class AutoLoginComponent extends Component {
 	 * @access public
 	 * @var string
 	 */
-	public $version = '3.2.2';
+	public $version = '3.2.3';
 
 	/**
 	 * Components.
@@ -190,7 +190,7 @@ class AutoLoginComponent extends Component {
 		}
 
 		// Is called after user login/logout validates, but before auth redirects
-		if ($controller->plugin == $this->settings['plugin'] && $controller->name == Inflector::camelize($this->settings['controller'])) {
+		if ($controller->plugin == Inflector::camelize($this->settings['plugin']) && $controller->name == Inflector::camelize($this->settings['controller'])) {
 			$data = $controller->request->data;
 			$action = isset($controller->request->params['action']) ? $controller->request->params['action'] : 'login';
 
