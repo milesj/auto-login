@@ -9,8 +9,7 @@
  * @license		http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
  * @link		http://milesj.me/code/cakephp/auto-login
  * 
- * @modified Mark Scherer
- * 2012-01-08 ms
+ * @modified 	Mark Scherer - 2012-01-08 ms
  */
 class AutoLoginComponent extends Component {
 
@@ -30,29 +29,29 @@ class AutoLoginComponent extends Component {
 	 */
 	public $components = array('Auth', 'Cookie');
 
-    /**
-     * Cookie name.
-     *
-     * @access public
-     * @var string
-     */
-    public $cookieName = 'autoLogin';
+	/**
+	 * Cookie name.
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $cookieName = 'autoLogin';
 
-    /**
-     * Cookie length (strtotime() format).
-     *
-     * @access public
-     * @var string
-     */
-    public $expires = '+2 weeks';
+	/**
+	 * Cookie length (strtotime() format).
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $expires = '+2 weeks';
 
-    /**
-     * Settings.
-     *
-     * @access public
-     * @var array
-     */
-    public $settings = array();
+	/**
+	 * Settings.
+	 *
+	 * @access public
+	 * @var array
+	 */
+	public $settings = array();
 
 	/**
 	 * Should we debug?
@@ -61,10 +60,10 @@ class AutoLoginComponent extends Component {
 	 * @var boolean
 	 */
 	protected $_debug = false;
-	
+
 	/**
 	 * Default settings.
-	 * 
+	 *
 	 * @access protected
 	 * @var array
 	 */
@@ -80,12 +79,12 @@ class AutoLoginComponent extends Component {
 
 	/**
 	 * Determines whether to trigger startup() logic.
-     *
-     * @access protected
-     * @var boolean
+	 *
+	 * @access protected
+	 * @var boolean
 	 */
 	protected $_isValidRequest = false;
-	
+
 	/**
 	 * Detect debug info.
 	 *
@@ -94,12 +93,12 @@ class AutoLoginComponent extends Component {
 	 * @return void
 	 */
 	public function initialize(Controller $controller) {
-        $autoLogin = (array) Configure::read('AutoLogin');
+		$autoLogin = (array) Configure::read('AutoLogin');
 
 		$defaults = $autoLogin + $this->_defaults;
 		$this->settings = $this->settings + $defaults;
-		
-        // Validate the cookie
+
+		// Validate the cookie
 		$cookie = $this->Cookie->read($this->cookieName);
 		$user = $this->Auth->user();
 
@@ -116,16 +115,16 @@ class AutoLoginComponent extends Component {
 			$this->delete();
 			return;
 		}
-		
+
 		// Set the data to identify with
 		$controller->request->data[$this->settings['model']][$this->settings['username']] = $cookie['username'];
-		$controller->request->data[$this->settings['model']][$this->settings['password']] = base64_decode($cookie['password']);		
+		$controller->request->data[$this->settings['model']][$this->settings['password']] = base64_decode($cookie['password']);
 
 		// Is debug enabled
 		$this->_debug = (isset($autoLogin['email']) && isset($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']));
 
-        // Request is valid, stop startup()
-        $this->_isValidRequest = true;
+		// Request is valid, stop startup()
+		$this->_isValidRequest = true;
 	}
 
 	/**
@@ -145,10 +144,10 @@ class AutoLoginComponent extends Component {
 
 			if (in_array('_autoLogin', get_class_methods($controller))) {
 				call_user_func_array(array($controller, '_autoLogin'), array(
-                    $this->Auth->user()
+					$this->Auth->user()
 				));
 			}
-			
+
 		} else {
 			$this->debug('loginFail', $this->Cookie, $this->Auth->user());
 
@@ -170,7 +169,7 @@ class AutoLoginComponent extends Component {
 	 */
 	public function beforeRedirect(Controller $controller) {
 		$model = $this->settings['model'];
-		
+
 		if (is_array($this->Auth->loginAction)) {
 			if (!empty($this->Auth->loginAction['controller'])) {
 				$this->settings['controller'] = $this->Auth->loginAction['controller'];
@@ -228,13 +227,13 @@ class AutoLoginComponent extends Component {
 	 */
 	public function save($username, $password) {
 		$time = time();
-		
+
 		$cookie = array();
 		$cookie['username'] = $username;
 		$cookie['password'] = base64_encode($password);
 		$cookie['hash'] = $this->Auth->password($username . $time);
 		$cookie['time'] = $time;
-		
+
 		if (env('REMOTE_ADDR') == '127.0.0.1' || env('HTTP_HOST') == 'localhost') {
 			$this->Cookie->domain = false;
 		}
