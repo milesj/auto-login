@@ -20,7 +20,7 @@ class AutoLoginComponent extends Component {
 	 * @access public
 	 * @var string
 	 */
-	public $version = '3.2.1';
+	public $version = '3.2.2';
 
 	/**
 	 * Components.
@@ -30,6 +30,30 @@ class AutoLoginComponent extends Component {
 	 */
 	public $components = array('Auth', 'Cookie');
 
+    /**
+     * Cookie name.
+     *
+     * @access public
+     * @var string
+     */
+    public $cookieName = 'autoLogin';
+
+    /**
+     * Cookie length (strtotime() format).
+     *
+     * @access public
+     * @var string
+     */
+    public $expires = '+2 weeks';
+
+    /**
+     * Settings.
+     *
+     * @access public
+     * @var array
+     */
+    public $settings = array();
+
 	/**
 	 * Should we debug?
 	 *
@@ -37,11 +61,6 @@ class AutoLoginComponent extends Component {
 	 * @var boolean
 	 */
 	protected $_debug = false;
-	
-	/**
-	 * set in initialize() - used in startup() 
-	 */
-	protected $_isValidRequest = false;
 	
 	/**
 	 * Default settings.
@@ -56,10 +75,16 @@ class AutoLoginComponent extends Component {
 		'plugin' => '',
 		'controller' => 'users',
 		'loginAction' => 'login',
-		'logoutAction' => 'logout',
-		'cookieName' => 'autoLogin',
-		'expires' => '+2 weeks', # Cookie length (strtotime() format)
+		'logoutAction' => 'logout'
 	);
+
+	/**
+	 * Determines whether to trigger startup() logic.
+     *
+     * @access protected
+     * @var boolean
+	 */
+	protected $_isValidRequest = false;
 	
 	/**
 	 * Detect debug info.
@@ -69,19 +94,23 @@ class AutoLoginComponent extends Component {
 	 * @return void
 	 */
 	public function initialize(Controller $controller) {
-		$defaults = am($this->_defaults, (array)Configure::read('AutoLogin'));
+        $autoLogin = (array) Configure::read('AutoLogin');
+
+		$defaults = $autoLogin + $this->_defaults;
 		$this->settings = $this->settings + $defaults;
 		
-		$this->Controller = $controller;
-		
-		$cookie = $this->Cookie->read($this->settings['cookieName']);
+        // Validate the cookie
+		$cookie = $this->Cookie->read($this->cookieName);
 		$user = $this->Auth->user();
-		if (!empty($user) || !$cookie || $controller->request->is('post')) {
+
+		if (!empty($user) || $controller->request->is('post')) {
 			return;
+
 		} elseif (!is_array($cookie)) {
 			$this->debug('cookieFail', $this->Cookie, $user);
 			$this->delete();
 			return;
+
 		} elseif ($cookie['hash'] != $this->Auth->password($cookie['username'] . $cookie['time'])) {
 			$this->debug('hashFail', $this->Cookie, $user);
 			$this->delete();
@@ -91,10 +120,12 @@ class AutoLoginComponent extends Component {
 		// Set the data to identify with
 		$controller->request->data[$this->settings['model']][$this->settings['username']] = $cookie['username'];
 		$controller->request->data[$this->settings['model']][$this->settings['password']] = base64_decode($cookie['password']);		
-		$this->_isValidRequest = true;
-		
-		$debug = Configure::read('AutoLogin');
-		$this->_debug = (isset($debug['email']) && isset($debug['ips']) && in_array(env('REMOTE_ADDR'), (array) $debug['ips']));
+
+		// Is debug enabled
+		$this->_debug = (isset($autoLogin['email']) && isset($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']));
+
+        // Request is valid, stop startup()
+        $this->_isValidRequest = true;
 	}
 
 	/**
@@ -108,23 +139,23 @@ class AutoLoginComponent extends Component {
 		if (!$this->_isValidRequest) {
 			return;
 		}
-		
-		$cookie = $this->Cookie->read($this->settings['cookieName']);
-		$user = $this->Auth->user();
-		
+
 		if ($this->Auth->login()) {
 			$this->debug('login', $this->Cookie, $this->Auth->user());
 
 			if (in_array('_autoLogin', get_class_methods($controller))) {
-				call_user_func_array(array($controller, '_autoLogin'), array($this->Auth->user()));
+				call_user_func_array(array($controller, '_autoLogin'), array(
+                    $this->Auth->user()
+				));
 			}
-			$controller->redirect(array());
 			
 		} else {
-			$this->debug('loginFail', $this->Cookie, $user);
+			$this->debug('loginFail', $this->Cookie, $this->Auth->user());
 
 			if (in_array('_autoLoginError', get_class_methods($controller))) {
-				call_user_func_array(array($controller, '_autoLoginError'), array($cookie));
+				call_user_func_array(array($controller, '_autoLoginError'), array(
+					$this->Cookie->read($this->cookieName)
+				));
 			}
 		}
 	}
@@ -173,7 +204,7 @@ class AutoLoginComponent extends Component {
 						if (!empty($username) && !empty($password) && $autoLogin) {
 							$this->save($username, $password);
 
-						} elseif (isset($data[$model]['auto_login']) && !$autoLogin) {
+						} else if (!$autoLogin) {
 							$this->delete();
 						}
 					}
@@ -208,7 +239,7 @@ class AutoLoginComponent extends Component {
 			$this->Cookie->domain = false;
 		}
 
-		$this->Cookie->write($this->settings['cookieName'], $cookie, true, $this->settings['expires']);
+		$this->Cookie->write($this->cookieName, $cookie, true, $this->expires);
 		$this->debug('cookieSet', $cookie, $this->Auth->user());
 	}
 
@@ -219,7 +250,7 @@ class AutoLoginComponent extends Component {
 	 * @return void
 	 */
 	public function delete() {
-		$this->Cookie->delete($this->settings['cookieName']);
+		$this->Cookie->delete($this->cookieName);
 	}
 
 	/**
@@ -245,7 +276,7 @@ class AutoLoginComponent extends Component {
 		);
 
 		if ($this->_debug && isset($scopes[$key])) {
-			$debug = Configure::read('AutoLogin');
+			$debug = (array) Configure::read('AutoLogin');
 			$content = "";
 
 			if (!empty($cookie) || !empty($user)) {
