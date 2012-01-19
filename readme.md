@@ -30,6 +30,17 @@ If you have Suhosin installed alongside PHP, you will run into problems with coo
 
 http://milesj.me/blog/read/security-cipher-suhosin
 
+Furthermore, you should define all the redirects, validation and login logic within your login action.
+
+	// Example
+	public function login() {
+		if ($this->User->validates()) {
+			if ($this->Auth->user()) {
+				$this->redirect($this->Auth->redirect());
+			}
+		}
+	}
+
 ## Documentation ##
 
 Thorough documentation can be found here: http://milesj.me/code/cakephp/auto-login
