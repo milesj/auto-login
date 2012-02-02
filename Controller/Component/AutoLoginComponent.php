@@ -9,7 +9,7 @@
  * @license		http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
  * @link		http://milesj.me/code/cakephp/auto-login
  * 
- * @modified 	Mark Scherer - 2012-02-02 ms
+ * @modified 	Mark Scherer - 2012-01-08 ms
  */
 class AutoLoginComponent extends Component {
 
@@ -54,6 +54,7 @@ class AutoLoginComponent extends Component {
 		'logoutAction' => 'logout',
 		'cookieName' => 'autoLogin',
 		'expires' => '+2 weeks', # Cookie length (strtotime() format)
+		'redirect' => true,
 		'debug' => null # Auto-Select based on debug mode or ip range
 	);
 
@@ -73,12 +74,16 @@ class AutoLoginComponent extends Component {
 	 * @return void
 	 */
 	public function initialize(Controller $controller) {
-		$defaults = $this->_defaults + (array) Configure::read('AutoLogin');
-		$this->settings = $this->settings + $defaults;
+		$this->settings = array_merge($this->_defaults, (array) Configure::read('AutoLogin'));
 
 		// Validate the cookie
 		$cookie = $this->Cookie->read($this->settings['cookieName']);
 		$user = $this->Auth->user();
+	
+		// Is debug enabled
+		if ($this->settings['debug'] === null) {
+			$this->settings['debug'] = Configure::read('debug') > 0 || !empty($autoLogin['email']) && !empty($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']);
+		}
 
 		if (!$this->settings['active'] || !empty($user) || !$cookie || !$controller->request->is('get')) {
 			return;
@@ -97,11 +102,6 @@ class AutoLoginComponent extends Component {
 		// Set the data to identify with
 		$controller->request->data[$this->settings['model']][$this->settings['username']] = $cookie['username'];
 		$controller->request->data[$this->settings['model']][$this->settings['password']] = base64_decode($cookie['password']);
-
-		// Is debug enabled
-		if ($this->settings['debug'] === null) {
-			$this->settings['debug'] = Configure::read('debug') > 0 || !empty($autoLogin['email']) && !empty($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']);
-		}
 
 		// Request is valid, stop startup()
 		$this->_isValidRequest = true;
@@ -127,7 +127,10 @@ class AutoLoginComponent extends Component {
 					$this->Auth->user()
 				));
 			}
-
+			if ($this->settings['redirect']) {
+				$controller->redirect(array(), 301);
+			}
+			
 		} else {
 			$this->debug('loginFail', $this->Cookie, $this->Auth->user());
 
@@ -274,7 +277,7 @@ class AutoLoginComponent extends Component {
 				if (!empty($debug['email'])) {
 					mail($debug['email'], '[AutoLogin] ' . $scopes[$key], $content, 'From: ' . $debug['email']);
 				} else {
-					$this->log($scopes[$key] . ': ' . $content, 'auto_login');
+					$this->log($scopes[$key] . ': ' . $content, 'autologin');
 				}
 			}
 		}
