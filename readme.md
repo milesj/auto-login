@@ -2,12 +2,12 @@
 
 A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
 
-This version is only compatible with CakePHP 2.0.
+This version is only compatible with CakePHP 2.x.
 
 ## Compatibility ##
 
 * v2.x - CakePHP 1.3
-* v3.x - CakePHP 2.0
+* v3.x - CakePHP 2.x
 
 ## Requirements ##
 
@@ -23,6 +23,7 @@ This version is only compatible with CakePHP 2.0.
 * Configuration options for cookie name and length
 * Functionality for additional user updating or error logging
 * Minor support for localhost cookies
+* Can be enabled/disabled dynamically using Configure
 
 ## Troubleshooting ##
 
@@ -40,6 +41,11 @@ Furthermore, you should define all the redirects, validation and login logic wit
 			}
 		}
 	}
+
+Also note:	
+This component should be included before the AuthComponent in order to avoid race conditions and "not logged in" messages triggered.
+
+    public $components = array('Session', 'RequestHandler', 'AutoLogin', 'Auth', ...);
 
 ## Documentation ##
 
