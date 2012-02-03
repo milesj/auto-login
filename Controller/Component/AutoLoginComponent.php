@@ -1,4 +1,6 @@
 <?php
+App::uses('Component', 'Controller');
+
 /**
  * AutoLoginComponent
  *
@@ -44,7 +46,7 @@ class AutoLoginComponent extends Component {
 	 * @var array
 	 */
 	protected $_defaults = array(
-		'active' => 1,
+		'active' => true,
 		'model' => 'User',
 		'username' => 'username',
 		'password' => 'password',
