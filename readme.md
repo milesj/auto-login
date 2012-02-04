@@ -28,8 +28,12 @@ This version is only compatible with CakePHP 2.x.
 
 ## Troubleshooting ##
 
-If you have Suhosin installed alongside PHP, you will run into problems with cookie encryption. It's best to disable Suhosin or implement this workaround. If you find a better solution, please notify me!
+If you have Suhosin installed alongside PHP, you will run into problems with cookie encryption.
+TIP: Use the test case attached to find out if your environment is affected.
+If so, add `suhosin.srand.ignore = Off` in your `/etc/php5/apache2/php.ini`.
+And don't forget to restart apache or at least `/etc/init.d/apache2 force-reload`.
 
+Details on this bug:
 http://milesj.me/blog/read/security-cipher-suhosin
 
 Furthermore, you should define all the redirects, validation and login logic within your login action.

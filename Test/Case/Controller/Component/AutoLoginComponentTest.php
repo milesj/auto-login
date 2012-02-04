@@ -18,7 +18,7 @@ class AutoLoginComponentTest extends CakeTestCase {
 	 * @return void
 	 */
 	public function setUp() {
-		$this->Controller = new AutoLoginTestController();
+		$this->Controller = new AutoLoginTestController(new CakeRequest, new CakeResponse);
 		$this->Controller->AutoLogin = new AutoLoginComponent(new ComponentCollection());
 	}
 
@@ -30,10 +30,25 @@ class AutoLoginComponentTest extends CakeTestCase {
 	 */
 	public function tearDown() {
 		unset($this->Controller->AutoLogin);
-		unset($this->Controller->Component);
 		unset($this->Controller);
 	}
 
+	/**
+	 * test if suhosin isn't messing up srand() and mt_srand()
+	 * run this on every the environment you want AutoLogin to work!
+	 * It this test fails add `suhosin.srand.ignore = Off`
+	 * in your `/etc/php5/apache2/php.ini`
+	 * And don't forget to restart apache or at least `/etc/init.d/apache2 force-reload`
+	 */
+	public function testIfRandWillWork() {
+		srand('1234567890');
+		$rand1 = rand(0, 255);
+		
+		srand('1234567890');
+		$rand2 = rand(0, 255);
+		
+		$this->assertSame($rand1, $rand2, 'You have the Suhosin BUG! Add `suhosin.srand.ignore = Off` to your php.ini!');
+	}
 
 	/**
 	 * test merge of configs
