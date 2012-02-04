@@ -153,7 +153,10 @@ class AutoLoginComponent extends Component {
 	 * @param Controller $controller
 	 * @return void
 	 */
-	public function beforeRedirect(Controller $controller) {
+	public function beforeRedirect(Controller $controller, $url, $status = null, $exit = true) {
+		if (empty($this->settings['active'])) {
+			return;
+		}
 		$model = $this->settings['model'];
 
 		if (is_array($this->Auth->loginAction)) {
