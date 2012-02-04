@@ -57,6 +57,7 @@ class AutoLoginComponent extends Component {
 		'cookieName' => 'autoLogin',
 		'expires' => '+2 weeks', # Cookie length (strtotime() format)
 		'redirect' => true,
+		'requirePrompt' => true, # Displayed checkbox determines if cookie is created
 		'debug' => null # Auto-Select based on debug mode or ip range
 	);
 
@@ -183,7 +184,7 @@ class AutoLoginComponent extends Component {
 					if (isset($data[$model])) {
 						$username = $data[$model][$this->settings['username']];
 						$password = $data[$model][$this->settings['password']];
-						$autoLogin = isset($data[$model]['auto_login']) ? $data[$model]['auto_login'] : 0;
+						$autoLogin = isset($data[$model]['auto_login']) ? $data[$model]['auto_login'] : !$this->settings['requirePrompt'];
 
 						if (!empty($username) && !empty($password) && $autoLogin) {
 							$this->save($username, $password);

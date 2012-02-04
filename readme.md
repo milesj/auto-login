@@ -16,6 +16,7 @@ This version is only compatible with CakePHP 2.x.
 ## Features ##
 
 * Requires no installation except for adding the checkbox into your user login forms
+* Using `requirePrompt` as `false` does not even require that (but use with caution!) 
 * Automatically saves the cookie and info when a user logs in
 * Automatically kills the cookie and session when a user logs out
 * Inserts a hash within the cookie so that it cannot be hijacked
