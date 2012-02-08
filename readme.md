@@ -2,12 +2,12 @@
 
 A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
 
-This version is only compatible with CakePHP 2.0.
+This version is only compatible with CakePHP 2.x.
 
 ## Compatibility ##
 
 * v2.x - CakePHP 1.3
-* v3.x - CakePHP 2.0
+* v3.x - CakePHP 2.x
 
 ## Requirements ##
 
@@ -16,6 +16,7 @@ This version is only compatible with CakePHP 2.0.
 ## Features ##
 
 * Requires no installation except for adding the checkbox into your user login forms
+* Using `requirePrompt` as `false` does not even require that (but use with caution!) 
 * Automatically saves the cookie and info when a user logs in
 * Automatically kills the cookie and session when a user logs out
 * Inserts a hash within the cookie so that it cannot be hijacked
@@ -23,11 +24,16 @@ This version is only compatible with CakePHP 2.0.
 * Configuration options for cookie name and length
 * Functionality for additional user updating or error logging
 * Minor support for localhost cookies
+* Can be enabled/disabled dynamically using Configure
 
 ## Troubleshooting ##
 
-If you have Suhosin installed alongside PHP, you will run into problems with cookie encryption. It's best to disable Suhosin or implement this workaround. If you find a better solution, please notify me!
+If you have Suhosin installed alongside PHP, you will run into problems with cookie encryption.
+TIP: Use the test case attached to find out if your environment is affected.
+If so, add `suhosin.srand.ignore = Off` in your `/etc/php5/apache2/php.ini`.
+And don't forget to restart apache or at least `/etc/init.d/apache2 force-reload`.
 
+Details on this bug:
 http://milesj.me/blog/read/security-cipher-suhosin
 
 Furthermore, you should define all the redirects, validation and login logic within your login action.
@@ -40,6 +46,11 @@ Furthermore, you should define all the redirects, validation and login logic wit
 			}
 		}
 	}
+
+Also note:	
+This component should be included before the AuthComponent in order to avoid race conditions and "not logged in" messages triggered.
+
+    public $components = array('Session', 'RequestHandler', 'AutoLogin', 'Auth', ...);
 
 ## Documentation ##
 
