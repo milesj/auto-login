@@ -26,32 +26,6 @@ This version is only compatible with CakePHP 2.x.
 * Minor support for localhost cookies
 * Can be enabled/disabled dynamically using Configure
 
-## Troubleshooting ##
-
-If you have Suhosin installed alongside PHP, you will run into problems with cookie encryption.
-TIP: Use the test case attached to find out if your environment is affected.
-If so, add `suhosin.srand.ignore = Off` in your `/etc/php5/apache2/php.ini`.
-And don't forget to restart apache or at least `/etc/init.d/apache2 force-reload`.
-
-Details on this bug:
-http://milesj.me/blog/read/security-cipher-suhosin
-
-Furthermore, you should define all the redirects, validation and login logic within your login action.
-
-	// Example
-	public function login() {
-		if ($this->User->validates()) {
-			if ($this->Auth->user()) {
-				$this->redirect($this->Auth->redirect());
-			}
-		}
-	}
-
-Also note:	
-This component should be included before the AuthComponent in order to avoid race conditions and "not logged in" messages triggered.
-
-    public $components = array('Session', 'RequestHandler', 'AutoLogin', 'Auth', ...);
-
 ## Documentation ##
 
 Thorough documentation can be found here: http://milesj.me/code/cakephp/auto-login
