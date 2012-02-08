@@ -1,14 +1,16 @@
 <?php
+/**
+ * AutoLogin Test Cases.
+ *
+ * @author		Miles Johnson - http://milesj.me
+ * @copyright	Copyright 2006-2011, Miles Johnson, Inc.
+ * @license		http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
+ * @link		http://milesj.me/code/cakephp/auto-login
+ */
 
 App::import('Component', 'AutoLogin');
 App::uses('Controller', 'Controller');
 
-/**
- * Short description for class.
- *
- * @package       cake.tests
- * @subpackage    cake.tests.cases.libs.controller.components
- */
 class AutoLoginComponentTest extends CakeTestCase {
 
 	/**
@@ -18,7 +20,7 @@ class AutoLoginComponentTest extends CakeTestCase {
 	 * @return void
 	 */
 	public function setUp() {
-		$this->Controller = new AutoLoginTestController(new CakeRequest, new CakeResponse);
+		$this->Controller = new AutoLoginTestController(new CakeRequest(), new CakeResponse());
 		$this->Controller->AutoLogin = new AutoLoginComponent(new ComponentCollection());
 	}
 
@@ -34,10 +36,9 @@ class AutoLoginComponentTest extends CakeTestCase {
 	}
 
 	/**
-	 * test if suhosin isn't messing up srand() and mt_srand()
-	 * run this on every the environment you want AutoLogin to work!
-	 * It this test fails add `suhosin.srand.ignore = Off`
-	 * in your `/etc/php5/apache2/php.ini`
+	 * Test if suhosin isn't messing up srand() and mt_srand()
+	 * Run this on every the environment you want AutoLogin to work!
+	 * It this test fails add `suhosin.srand.ignore = Off` in your `/etc/php5/apache2/php.ini`
 	 * And don't forget to restart apache or at least `/etc/init.d/apache2 force-reload`
 	 */
 	public function testIfRandWillWork() {
@@ -51,7 +52,7 @@ class AutoLoginComponentTest extends CakeTestCase {
 	}
 
 	/**
-	 * test merge of configs
+	 * Test merge of configs.
 	 */
 	public function testConfigs() {
 		$this->Controller->AutoLogin->initialize($this->Controller);
@@ -66,50 +67,39 @@ class AutoLoginComponentTest extends CakeTestCase {
 		Configure::write('AutoLogin.cookieName', 'myOtherAutoLogin');
 		$this->Controller->AutoLogin->initialize($this->Controller);
 		$settings = $this->Controller->AutoLogin->settings;
-		//debug($settings); die();
 		$this->assertSame('myOtherAutoLogin', $settings['cookieName']);
 	}
 
 }
 
-
-/**
- * Short description for class.
- *
- * @package       cake.tests
- * @subpackage    cake.tests.cases.libs.controller.components
- */
 class AutoLoginTestController extends Controller {
-	/**
-	 * name property
-	 *
-	 * @var string 'SecurityTest'
-	 * @access public
-	 */
 
 	/**
-	 * components property
+	 * Components.
 	 *
-	 * @var array
 	 * @access public
+	 * @var array
 	 */
 	public $components = array('AutoLogin');
+
 	/**
-	 * failed property
+	 * Failed property.
 	 *
-	 * @var bool false
 	 * @access public
+	 * @var boolean
 	 */
 	public $failed = false;
+
 	/**
-	 * Used for keeping track of headers in test
+	 * Used for keeping track of headers in test.
 	 *
-	 * @var array
 	 * @access public
+	 * @var array
 	 */
 	public $testHeaders = array();
+
 	/**
-	 * fail method
+	 * Fail method.
 	 *
 	 * @access public
 	 * @return void
@@ -117,26 +107,29 @@ class AutoLoginTestController extends Controller {
 	public function fail() {
 		$this->failed = true;
 	}
+
 	/**
-	 * redirect method
+	 * Redirect method.
 	 *
+	 * @access public
 	 * @param mixed $option
 	 * @param mixed $code
 	 * @param mixed $exit
-	 * @access public
 	 * @return void
 	 */
 	public function redirect($option, $code, $exit) {
 		return $code;
 	}
+
 	/**
-	 * Conveinence method for header()
+	 * Convenience method for header().
 	 *
+	 * @access public
 	 * @param string $status
 	 * @return void
-	 * @access public
 	 */
 	public function header($status) {
 		$this->testHeaders[] = $status;
 	}
+
 }

@@ -1,6 +1,4 @@
 <?php
-App::uses('Component', 'Controller');
-
 /**
  * AutoLoginComponent
  *
@@ -13,6 +11,9 @@ App::uses('Component', 'Controller');
  * 
  * @modified 	Mark Scherer - 2012-01-08 ms
  */
+
+App::uses('Component', 'Controller');
+
 class AutoLoginComponent extends Component {
 
 	/**
@@ -38,6 +39,14 @@ class AutoLoginComponent extends Component {
 	 * @var array
 	 */
 	public $settings = array();
+	
+	/**
+	 * Should we debug?
+	 *
+	 * @access protected
+	 * @var boolean
+	 */
+	protected $_debug = false;
 
 	/**
 	 * Default settings.
@@ -46,19 +55,22 @@ class AutoLoginComponent extends Component {
 	 * @var array
 	 */
 	protected $_defaults = array(
-		'active' => true,
+		// Model
 		'model' => 'User',
 		'username' => 'username',
 		'password' => 'password',
+		// Controller
 		'plugin' => '',
 		'controller' => 'users',
 		'loginAction' => 'login',
 		'logoutAction' => 'logout',
+		// Cookie
 		'cookieName' => 'autoLogin',
-		'expires' => '+2 weeks', # Cookie length (strtotime() format)
-		'redirect' => true,
-		'requirePrompt' => true, # Displayed checkbox determines if cookie is created
-		'debug' => null # Auto-Select based on debug mode or ip range
+		'expires' => '+2 weeks', 		// Cookie length (strtotime() format)
+		// Logic
+		'redirect' => true,				// Force a redirect after successful autologin
+		'requirePrompt' => true, 		// Displayed checkbox determines if cookie is created
+		'active' => true				// Force the process to continue or exit
 	);
 
 	/**
@@ -77,26 +89,34 @@ class AutoLoginComponent extends Component {
 	 * @return void
 	 */
 	public function initialize(Controller $controller) {
-		$this->settings = array_merge($this->_defaults, (array) Configure::read('AutoLogin'));
+		$autoLogin = (array) Configure::read('AutoLogin');
+		$this->settings = array_merge($this->_defaults, $autoLogin);
+
+		// Backwards support
+		if (isset($this->cookieName)) {
+			$this->settings['cookieName'] = $this->cookieName;
+		}
+
+		if (isset($this->expires)) {
+			$this->settings['expires'] = $this->expires;
+		}
 
 		// Validate the cookie
 		$cookie = $this->Cookie->read($this->settings['cookieName']);
 		$user = $this->Auth->user();
 	
 		// Is debug enabled
-		if ($this->settings['debug'] === null) {
-			$this->settings['debug'] = Configure::read('debug') > 0 || !empty($autoLogin['email']) && !empty($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']);
-		}
+		$this->_debug = (!empty($autoLogin['email']) && !empty($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']));
 
-		if (!$this->settings['active'] || !empty($user) || !$cookie || !$controller->request->is('get')) {
+		if (!$this->settings['active'] || !empty($user) || !$controller->request->is('get')) {
 			return;
 
-		} elseif (!is_array($cookie)) {
+		} else if (!is_array($cookie) || !$cookie) {
 			$this->debug('cookieFail', $this->Cookie, $user);
 			$this->delete();
 			return;
 
-		} elseif ($cookie['hash'] != $this->Auth->password($cookie['username'] . $cookie['time'])) {
+		} else if ($cookie['hash'] != $this->Auth->password($cookie['username'] . $cookie['time'])) {
 			$this->debug('hashFail', $this->Cookie, $user);
 			$this->delete();
 			return;
@@ -130,6 +150,7 @@ class AutoLoginComponent extends Component {
 					$this->Auth->user()
 				));
 			}
+
 			if ($this->settings['redirect']) {
 				$controller->redirect(array(), 301);
 			}
@@ -157,6 +178,7 @@ class AutoLoginComponent extends Component {
 		if (empty($this->settings['active'])) {
 			return;
 		}
+
 		$model = $this->settings['model'];
 
 		if (is_array($this->Auth->loginAction)) {
@@ -192,16 +214,16 @@ class AutoLoginComponent extends Component {
 						if (!empty($username) && !empty($password) && $autoLogin) {
 							$this->save($username, $password);
 
-						} elseif (!$autoLogin) {
+						} else if (!$autoLogin) {
 							$this->delete();
 						}
 					}
-					break;
+				break;
 
 				case $this->settings['logoutAction']:
 					$this->debug('logout', $this->Cookie, $this->Auth->user());
 					$this->delete();
-					break;
+				break;
 			}
 		}
 	}
@@ -263,7 +285,7 @@ class AutoLoginComponent extends Component {
 			'custom'			=> 'Custom Callback'
 		);
 
-		if ($this->settings['debug'] && isset($scopes[$key])) {
+		if ($this->_debug && isset($scopes[$key])) {
 			$debug = (array) Configure::read('AutoLogin');
 			$content = "";
 
@@ -283,7 +305,7 @@ class AutoLoginComponent extends Component {
 				if (!empty($debug['email'])) {
 					mail($debug['email'], '[AutoLogin] ' . $scopes[$key], $content, 'From: ' . $debug['email']);
 				} else {
-					$this->log($scopes[$key] . ': ' . $content, 'autologin');
+					$this->log($scopes[$key] . ': ' . $content, LOG_DEBUG);
 				}
 			}
 		}
