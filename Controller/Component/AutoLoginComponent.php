@@ -172,7 +172,7 @@ class AutoLoginComponent extends Component {
 			$this->delete();
 			return;
 
-		} else if ($cookie['hash'] != $this->Auth->password($cookie['username'] . $cookie['time'])) {
+		} else if (empty($cookie['hash']) || $cookie['hash'] != $this->Auth->password($cookie['username'] . $cookie['time'])) {
 			$this->debug('hashFail', $this->Cookie, $user);
 			$this->delete();
 			return;
@@ -238,7 +238,7 @@ class AutoLoginComponent extends Component {
 	 * @return void
 	 */
 	public function beforeRedirect(Controller $controller, $url, $status = null, $exit = true) {
-		if (empty($this->active)) {
+		if (!$this->active) {
 			return;
 		}
 
