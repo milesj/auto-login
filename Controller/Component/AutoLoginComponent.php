@@ -4,7 +4,7 @@
  *
  * A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
  *
- * @version		3.5
+ * @version		3.5.1
  * @author		Miles Johnson - http://milesj.me
  * @copyright	Copyright 2006-2011, Miles Johnson, Inc.
  * @license		http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
@@ -101,7 +101,7 @@ class AutoLoginComponent extends Component {
 	 * Force a redirect after successful auto login.
 	 *
 	 * @access public
-	 * @var string
+	 * @var boolean
 	 */
 	public $redirect = true;
 
@@ -109,7 +109,7 @@ class AutoLoginComponent extends Component {
 	 * Displayed checkbox determines if cookie is created.
 	 *
 	 * @access public
-	 * @var string
+	 * @var boolean
 	 */
 	public $requirePrompt = true;
 
@@ -117,7 +117,7 @@ class AutoLoginComponent extends Component {
 	 * Force the process to continue or exit.
 	 *
 	 * @access public
-	 * @var string
+	 * @var boolean
 	 */
 	public $active = true;
 	
@@ -161,13 +161,13 @@ class AutoLoginComponent extends Component {
 	 * @return void
 	 */
 	public function initialize(Controller $controller) {
-		$cookie = $this->Cookie->read($this->cookieName);
+		$cookie = $this->read();
 		$user = $this->Auth->user();
 
 		if (!$this->active || !empty($user) || !$controller->request->is('get')) {
 			return;
 
-		} else if (!is_array($cookie) || !$cookie) {
+		} else if (!$cookie) {
 			$this->debug('cookieFail', $this->Cookie, $user);
 			$this->delete();
 			return;
@@ -179,8 +179,8 @@ class AutoLoginComponent extends Component {
 		}
 
 		// Set the data to identify with
-		$controller->request->data[$this->model][$this->username] = base64_decode($cookie['username']);
-		$controller->request->data[$this->model][$this->password] = base64_decode($cookie['password']);
+		$controller->request->data[$this->model][$this->username] = $cookie['username'];
+		$controller->request->data[$this->model][$this->password] = $cookie['password'];
 
 		// Request is valid, stop startup()
 		$this->_isValidRequest = true;
@@ -221,7 +221,7 @@ class AutoLoginComponent extends Component {
 
 			if (in_array('_autoLoginError', get_class_methods($controller))) {
 				call_user_func_array(array($controller, '_autoLoginError'), array(
-					$this->Cookie->read($this->cookieName)
+					$this->read()
 				));
 			}
 		}
@@ -289,6 +289,30 @@ class AutoLoginComponent extends Component {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Read the AutoLogin cookie and base64_decode().
+	 *
+	 * @access public
+	 * @return array|boolean
+	 */
+	public function read() {
+		$cookie = $this->Cookie->read($this->cookieName);
+
+		if (empty($cookie) || !is_array($cookie)) {
+			return false;
+		}
+
+		if (isset($cookie['username'])) {
+			$cookie['username'] = base64_decode($cookie['username']);
+		}
+
+		if (isset($cookie['password'])) {
+			$cookie['password'] = base64_decode($cookie['password']);
+		}
+
+		return $cookie;
 	}
 
 	/**
