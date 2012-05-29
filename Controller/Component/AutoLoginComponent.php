@@ -332,10 +332,6 @@ class AutoLoginComponent extends Component {
 		$cookie['hash'] = $this->Auth->password($username . $time);
 		$cookie['time'] = $time;
 
-		if (env('REMOTE_ADDR') == '127.0.0.1' || env('HTTP_HOST') == 'localhost') {
-			$this->Cookie->domain = false;
-		}
-
 		$this->Cookie->write($this->cookieName, $cookie, true, $this->expires);
 		$this->debug('cookieSet', $cookie, $this->Auth->user());
 	}
