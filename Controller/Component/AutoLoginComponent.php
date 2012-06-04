@@ -98,6 +98,14 @@ class AutoLoginComponent extends Component {
 	public $expires = '+2 weeks';
 
 	/**
+	 * Domain used on a local environment (localhost)
+	 *
+	 * @access public
+	 * @var boolean
+	 */
+	public $cookieLocalDomain = false;
+
+	/**
 	 * Force a redirect after successful auto login.
 	 *
 	 * @access public
@@ -331,6 +339,10 @@ class AutoLoginComponent extends Component {
 		$cookie['password'] = base64_encode($password);
 		$cookie['hash'] = $this->Auth->password($username . $time);
 		$cookie['time'] = $time;
+
+		if (env('REMOTE_ADDR') == '127.0.0.1' || env('HTTP_HOST') == 'localhost') {
+			$this->Cookie->domain = $this->cookieLocalDomain;
+		}
 
 		$this->Cookie->write($this->cookieName, $cookie, true, $this->expires);
 		$this->debug('cookieSet', $cookie, $this->Auth->user());
