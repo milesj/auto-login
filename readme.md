@@ -1,4 +1,4 @@
-# Auto Login v3.5.1 #
+# Auto Login v3.5.2 #
 
 A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
 
@@ -16,7 +16,7 @@ This version is only compatible with CakePHP 2.x.
 ## Features ##
 
 * Requires no installation except for adding the checkbox into your user login forms
-* Using `requirePrompt` as `false` does not even require that (but use with caution!) 
+* Using `requirePrompt` as `false` does not even require that (but use with caution!)
 * Automatically saves the cookie and info when a user logs in
 * Automatically kills the cookie and session when a user logs out
 * Inserts a hash within the cookie so that it cannot be hijacked
