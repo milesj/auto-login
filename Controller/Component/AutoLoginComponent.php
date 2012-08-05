@@ -156,7 +156,7 @@ class AutoLoginComponent extends Component {
 		$autoLogin = (array) Configure::read('AutoLogin');
 
 		// Is debug enabled
-		$this->_debug = (!empty($autoLogin['email']) && !empty($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']));
+		$this->_debug = (!empty($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']));
 
 		parent::__construct($collection, array_merge((array) $settings, $autoLogin));
 	}
@@ -175,7 +175,7 @@ class AutoLoginComponent extends Component {
 		if (!$this->active || !empty($user) || !$controller->request->is('get')) {
 			return;
 
-		} else if (!$cookie) {
+		} else if ($cookie === null) {
 			$this->debug('cookieFail', $this->Cookie, $user);
 			$this->delete();
 			return;
@@ -303,13 +303,13 @@ class AutoLoginComponent extends Component {
 	 * Read the AutoLogin cookie and base64_decode().
 	 *
 	 * @access public
-	 * @return array|boolean
+	 * @return array|null
 	 */
 	public function read() {
 		$cookie = $this->Cookie->read($this->cookieName);
 
 		if (empty($cookie) || !is_array($cookie)) {
-			return false;
+			return null;
 		}
 
 		if (isset($cookie['username'])) {
