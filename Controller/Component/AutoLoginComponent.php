@@ -138,14 +138,6 @@ class AutoLoginComponent extends Component {
 	protected $_debug = false;
 
 	/**
-	 * Determines whether to trigger startup() logic.
-	 *
-	 * @access protected
-	 * @var boolean
-	 */
-	protected $_isValidRequest = false;
-
-	/**
 	 * Initialize settings and debug.
 	 *
 	 * @access public
@@ -162,13 +154,19 @@ class AutoLoginComponent extends Component {
 	}
 
 	/**
-	 * Detect cookie and hash and test for successful login persistence.
+	 * Automatically login existent Auth session; called after controllers beforeFilter() so that Auth is initialized.
 	 *
 	 * @access public
 	 * @param Controller $controller
 	 * @return void
 	 */
-	public function initialize(Controller $controller) {
+	public function startup(Controller $controller) {
+		// Backwards support
+		if (isset($this->settings)) {
+			$this->_set($this->settings);
+		}
+
+		// Detect cookie or login
 		$cookie = $this->read();
 		$user = $this->Auth->user();
 
@@ -189,27 +187,6 @@ class AutoLoginComponent extends Component {
 		// Set the data to identify with
 		$controller->request->data[$this->model][$this->username] = $cookie['username'];
 		$controller->request->data[$this->model][$this->password] = $cookie['password'];
-
-		// Request is valid, stop startup()
-		$this->_isValidRequest = true;
-	}
-
-	/**
-	 * Automatically login existent Auth session; called after controllers beforeFilter() so that Auth is initialized.
-	 *
-	 * @access public
-	 * @param Controller $controller
-	 * @return void
-	 */
-	public function startup(Controller $controller) {
-		if (!$this->_isValidRequest) {
-			return;
-		}
-
-		// Backwards support
-		if (isset($this->settings)) {
-			$this->_set($this->settings);
-		}
 
 		if ($this->Auth->login()) {
 			$this->debug('login', $this->Cookie, $this->Auth->user());
