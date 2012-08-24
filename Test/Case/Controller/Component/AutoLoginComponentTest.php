@@ -44,30 +44,11 @@ class AutoLoginComponentTest extends CakeTestCase {
 	public function testIfRandWillWork() {
 		srand('1234567890');
 		$rand1 = rand(0, 255);
-		
+
 		srand('1234567890');
 		$rand2 = rand(0, 255);
-		
+
 		$this->assertSame($rand1, $rand2, 'You have the Suhosin BUG! Add `suhosin.srand.ignore = Off` to your php.ini!');
-	}
-
-	/**
-	 * Test merge of configs.
-	 */
-	public function testConfigs() {
-		$this->Controller->AutoLogin->initialize($this->Controller);
-		$settings = $this->Controller->AutoLogin->settings;
-		$this->assertSame('autoLogin', $settings['cookieName']);
-
-		Configure::write('AutoLogin.cookieName', 'myAutoLogin');
-		$this->Controller->AutoLogin->initialize($this->Controller);
-		$settings = $this->Controller->AutoLogin->settings;
-		$this->assertSame('myAutoLogin', $settings['cookieName']);
-
-		Configure::write('AutoLogin.cookieName', 'myOtherAutoLogin');
-		$this->Controller->AutoLogin->initialize($this->Controller);
-		$settings = $this->Controller->AutoLogin->settings;
-		$this->assertSame('myOtherAutoLogin', $settings['cookieName']);
 	}
 
 }

@@ -4,7 +4,7 @@
  *
  * A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
  *
- * @version		3.5.3
+ * @version		3.5.4
  * @author		Miles Johnson - http://milesj.me
  * @copyright	Copyright 2006-2011, Miles Johnson, Inc.
  * @license		http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
@@ -178,7 +178,7 @@ class AutoLoginComponent extends Component {
 			$this->delete();
 			return;
 
-		} else if (empty($cookie['hash']) || $cookie['hash'] != $this->Auth->password($cookie['username'] . $cookie['time'])) {
+		} else if (empty($cookie['hash']) || $cookie['hash'] !== $this->Auth->password($cookie['username'] . $cookie['time'])) {
 			$this->debug('hashFail', $this->Cookie, $user);
 			$this->delete();
 			return;
@@ -248,7 +248,7 @@ class AutoLoginComponent extends Component {
 		}
 
 		// Is called after user login/logout validates, but before auth redirects
-		if ($controller->plugin == Inflector::camelize($this->plugin) && $controller->name == Inflector::camelize($this->controller)) {
+		if ($controller->plugin === Inflector::camelize($this->plugin) && $controller->name === Inflector::camelize($this->controller)) {
 			$data = $controller->request->data;
 			$action = isset($controller->request->params['action']) ? $controller->request->params['action'] : 'login';
 
@@ -260,7 +260,7 @@ class AutoLoginComponent extends Component {
 						$autoLogin = isset($data[$model]['auto_login']) ? $data[$model]['auto_login'] : !$this->requirePrompt;
 
 						if (!empty($username) && !empty($password) && $autoLogin) {
-							$this->save($username, $password);
+							$this->write($username, $password);
 
 						} else if (!$autoLogin) {
 							$this->delete();
@@ -308,7 +308,7 @@ class AutoLoginComponent extends Component {
 	 * @param string $password
 	 * @return void
 	 */
-	public function save($username, $password) {
+	public function write($username, $password) {
 		$time = time();
 
 		$cookie = array();
@@ -317,7 +317,7 @@ class AutoLoginComponent extends Component {
 		$cookie['hash'] = $this->Auth->password($username . $time);
 		$cookie['time'] = $time;
 
-		if (env('REMOTE_ADDR') == '127.0.0.1' || env('HTTP_HOST') == 'localhost') {
+		if (env('REMOTE_ADDR') === '127.0.0.1' || env('HTTP_HOST') === 'localhost') {
 			$this->Cookie->domain = $this->cookieLocalDomain;
 		}
 
