@@ -1,4 +1,4 @@
-# Auto Login v3.5.4 #
+# Auto Login v3.6.0 #
 
 A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
 

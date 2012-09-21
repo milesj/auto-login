@@ -4,7 +4,7 @@
  *
  * A CakePHP Component that will automatically login the Auth session for a duration if the user requested to (saves data to cookies).
  *
- * @version		3.5.4
+ * @version		3.6.0
  * @author		Miles Johnson - http://milesj.me
  * @copyright	Copyright 2006-2011, Miles Johnson, Inc.
  * @license		http://opensource.org/licenses/mit-license.php - Licensed under The MIT License
