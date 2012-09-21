@@ -98,7 +98,7 @@ class AutoLoginComponent extends Component {
 	public $expires = '+2 weeks';
 
 	/**
-	 * Domain used on a local environment (localhost)
+	 * Domain used on a local environment (localhost).
 	 *
 	 * @access public
 	 * @var boolean
@@ -141,16 +141,13 @@ class AutoLoginComponent extends Component {
 	 * Initialize settings and debug.
 	 *
 	 * @access public
-	 * @param ComponentCollection $collection
-	 * @param array $settings
+	 * @param Controller $controller
 	 */
-	public function __construct(ComponentCollection $collection, $settings = array()) {
+	public function initialize(Controller $controller) {
 		$autoLogin = (array) Configure::read('AutoLogin');
 
-		// Is debug enabled
+		// Is debug enabled?
 		$this->_debug = (!empty($autoLogin['ips']) && in_array(env('REMOTE_ADDR'), (array) $autoLogin['ips']));
-
-		parent::__construct($collection, array_merge((array) $settings, $autoLogin));
 	}
 
 	/**
@@ -192,22 +189,17 @@ class AutoLoginComponent extends Component {
 			$this->debug('login', $this->Cookie, $this->Auth->user());
 
 			if (in_array('_autoLogin', get_class_methods($controller))) {
-				call_user_func_array(array($controller, '_autoLogin'), array(
-					$this->Auth->user()
-				));
+				call_user_func(array($controller, '_autoLogin'), $this->Auth->user());
 			}
 
 			if ($this->redirect) {
 				$controller->redirect(array(), 301);
 			}
-
 		} else {
 			$this->debug('loginFail', $this->Cookie, $this->Auth->user());
 
 			if (in_array('_autoLoginError', get_class_methods($controller))) {
-				call_user_func_array(array($controller, '_autoLoginError'), array(
-					$this->read()
-				));
+				call_user_func(array($controller, '_autoLoginError'), $this->read());
 			}
 		}
 	}
@@ -361,12 +353,12 @@ class AutoLoginComponent extends Component {
 			$debug = (array) Configure::read('AutoLogin');
 			$content = "";
 
-			if (!empty($cookie) || !empty($user)) {
-				if (!empty($cookie)) {
+			if ($cookie || $user) {
+				if ($cookie) {
 					$content .= "Cookie information: \n\n" . print_r($cookie, true) . "\n\n\n";
 				}
 
-				if (!empty($user)) {
+				if ($user) {
 					$content .= "User information: \n\n" . print_r($user, true);
 				}
 			} else {
